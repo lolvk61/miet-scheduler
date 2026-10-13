@@ -16,16 +16,36 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 1
-        versionName = "0.1.0"
+        versionName = "1.0.0"
 
         ndk {
             abiFilters += listOf("arm64-v8a", "x86_64")
         }
     }
 
+    // Ключ подписи хранится вне репозитория. Без keystore.properties релиз собирается
+    // неподписанным. Формат: storeFile, storePassword, keyAlias, keyPassword.
+    val keystoreFile = rootProject.file("keystore.properties")
+    val releaseSigning = if (keystoreFile.exists()) {
+        val props = Properties().apply { keystoreFile.reader().use(::load) }
+        signingConfigs.create("release") {
+            storeFile = file(props.getProperty("storeFile"))
+            storePassword = props.getProperty("storePassword")
+            keyAlias = props.getProperty("keyAlias")
+            keyPassword = props.getProperty("keyPassword")
+        }
+    } else {
+        null
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = releaseSigning
+        }
+        debug {
+            // Отладочная сборка ставится рядом с релизной, а не поверх неё.
+            applicationIdSuffix = ".debug"
         }
     }
     compileOptions {

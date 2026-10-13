@@ -4,3 +4,8 @@ local.properties
 *.iml
 .idea/
 captures/
+keystore.properties
+*.jks
+*.keystore
+/preview.png
+/safezone.png
