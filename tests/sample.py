@@ -4,6 +4,7 @@
 неделя "1 числитель" начинается в понедельник 31.08.2026.
 """
 
+import copy
 import datetime
 from typing import Any
 
@@ -101,6 +102,34 @@ OPTIONAL_ENTRIES = [
     make_entry(5, 1, 3, "[ФТД] Основы военной подготовки [Лек]",
                "Морозов Андрей Николаевич", "1204 м", class_code="military-basics"),
 ]  # fmt: skip
+
+
+# Вторая группа для своего расписания из нескольких групп.
+OTHER = "ТСТ-21"
+
+
+def as_group(entries: list[dict[str, Any]], group: str) -> list[dict[str, Any]]:
+    result = copy.deepcopy(entries)
+    for entry in result:
+        entry["Group"]["Name"] = group
+    return result
+
+
+OTHER_ENTRIES = as_group(
+    [
+        # Поточная лекция: та же, что у GROUP в понедельник 1-го числителя.
+        make_entry(1, 0, 1, "Математический анализ [Лек]", "Иванов Иван Иванович",
+                   "1201 м", class_code="matan", room_code=120),
+        # Чужой предмет в ту же пару, что «Физика [Лаб]» у GROUP.
+        make_entry(2, 0, 3, "Химия [Лаб]", "Орлова Ольга Игоревна", "2101",
+                   class_code="chem", room_code=210),
+        make_entry(4, 0, 2, "Химия [Лек]", "Орлова Ольга Игоревна", "2101",
+                   class_code="chem", room_code=210),
+        make_entry(4, 2, 2, "Химия [Лек]", "Орлова Ольга Игоревна", "2101",
+                   class_code="chem", room_code=210),
+    ],
+    OTHER,
+)  # fmt: skip
 
 
 def expected_dates(

@@ -25,13 +25,16 @@ class UnknownGroupError(MietApiError):
 class MietClient:
     def __init__(self, client: httpx.AsyncClient) -> None:
         self._client = client
+        self._groups: list[str] | None = None
 
     async def groups(self) -> list[str]:
-        """Список всех групп."""
-        data = await self._request("POST", "/groups")
-        if not isinstance(data, list):
-            raise MietApiError("Неожиданный формат списка групп")
-        return [str(g) for g in data]
+        """Список всех групп. Загружается один раз на клиент."""
+        if self._groups is None:
+            data = await self._request("POST", "/groups")
+            if not isinstance(data, list):
+                raise MietApiError("Неожиданный формат списка групп")
+            self._groups = [str(g) for g in data]
+        return list(self._groups)
 
     async def schedule(self, group: str) -> dict[str, Any]:
         """Сырое расписание группы.
